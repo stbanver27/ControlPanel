@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Editar cliente{% endblock %}
+{% block page_heading %}Editar cliente{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Editar: {{ customer.nombre }}</div>
+  <a href="/customers/{{ customer.id }}" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="card form-page">
+  {% if error %}
+  <div class="error-alert">✕ {{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/customers/{{ customer.id }}/edit">
+    <div class="form-grid form-grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label" for="nombre">Nombre <span class="required">*</span></label>
+        <input class="form-control" type="text" id="nombre" name="nombre" value="{{ customer.nombre }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="username">Username IPTV</label>
+        <input class="form-control" type="text" id="username" name="username" value="{{ customer.username or '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="whatsapp">WhatsApp</label>
+        <input class="form-control" type="text" id="whatsapp" name="whatsapp" value="{{ customer.whatsapp or '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-control" type="email" id="email" name="email" value="{{ customer.email or '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pais">País</label>
+        <input class="form-control" type="text" id="pais" name="pais" value="{{ customer.pais or '' }}">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="estado">Estado</label>
+        <select class="form-control" id="estado" name="estado">
+          <option value="activo"     {% if customer.estado == 'activo'     %}selected{% endif %}>Activo</option>
+          <option value="vencido"    {% if customer.estado == 'vencido'    %}selected{% endif %}>Vencido</option>
+          <option value="suspendido" {% if customer.estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Etiquetas</label>
+      <div class="checkbox-group">
+        {% for tag in tags %}
+        <label class="checkbox-item">
+          <input type="checkbox" name="tag_ids" value="{{ tag.id }}"
+            {% if tag in customer.tags %}checked{% endif %}>
+          {{ tag.nombre }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:20px">
+      <label class="form-label" for="notas">Notas internas</label>
+      <textarea class="form-control" id="notas" name="notas">{{ customer.notas or '' }}</textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <a href="/customers/{{ customer.id }}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

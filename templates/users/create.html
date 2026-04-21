@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Nuevo usuario{% endblock %}
+{% block page_heading %}Nuevo usuario{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Crear usuario</div>
+  <a href="/users" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="card form-page">
+  {% if error %}
+  <div class="error-alert">✕ {{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/users/create">
+    <div class="form-grid form-grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label" for="email">Email <span class="required">*</span></label>
+        <input class="form-control" type="email" id="email" name="email"
+               value="{{ form.email if form else '' }}" required placeholder="usuario@empresa.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="rol">Rol <span class="required">*</span></label>
+        <select class="form-control" id="rol" name="rol" required>
+          <option value="admin" {% if form and form.rol == 'admin' %}selected{% endif %}>admin</option>
+          <option value="superadmin" {% if form and form.rol == 'superadmin' %}selected{% endif %}>superadmin</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Contraseña <span class="required">*</span></label>
+        <input class="form-control" type="password" id="password" name="password" required placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="confirm_password">Confirmar contraseña <span class="required">*</span></label>
+        <input class="form-control" type="password" id="confirm_password" name="confirm_password" required placeholder="Repetir contraseña">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:20px">
+      <label class="toggle-group">
+        <span class="form-label" style="margin:0">Usuario activo</span>
+        <label class="toggle-switch">
+          <input type="checkbox" name="is_active" value="on" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Crear usuario</button>
+      <a href="/users" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

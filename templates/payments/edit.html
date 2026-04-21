@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Editar pago{% endblock %}
+{% block page_heading %}Editar pago{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Editar pago #{{ payment.id }}</div>
+  <a href="/payments" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="card form-page">
+  {% if error %}
+  <div class="error-alert">✕ {{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/payments/{{ payment.id }}/edit">
+    <div class="form-grid form-grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label" for="customer_id">Cliente <span class="required">*</span></label>
+        <select class="form-control" id="customer_id" name="customer_id" required>
+          {% for c in customers %}
+          <option value="{{ c.id }}" {% if c.id == payment.customer_id %}selected{% endif %}>
+            {{ c.nombre }}{% if c.username %} ({{ c.username }}){% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="subscription_id">Suscripción asociada</label>
+        <select class="form-control" id="subscription_id" name="subscription_id">
+          <option value="">— Sin suscripción —</option>
+          {% for sub in subscriptions %}
+          <option value="{{ sub.id }}" data-customer="{{ sub.customer_id }}"
+            {% if payment.subscription_id and sub.id == payment.subscription_id %}selected{% endif %}>
+            #{{ sub.id }} — {{ sub.customer.nombre }} — vence {{ sub.fecha_vencimiento.strftime('%d/%m/%Y') }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="metodo">Método de pago <span class="required">*</span></label>
+        <select class="form-control" id="metodo" name="metodo" required>
+          {% for m in metodos %}
+          <option value="{{ m }}" {% if m == payment.metodo %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="moneda">Moneda <span class="required">*</span></label>
+        <select class="form-control" id="moneda" name="moneda" required>
+          {% for mon in monedas %}
+          <option value="{{ mon }}" {% if mon == payment.moneda %}selected{% endif %}>{{ mon }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="monto">Monto <span class="required">*</span></label>
+        <input class="form-control" type="number" id="monto" name="monto"
+               value="{{ payment.monto }}" required min="0.01" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="notas">Notas</label>
+        <input class="form-control" type="text" id="notas" name="notas" value="{{ payment.notas or '' }}">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <a href="/payments" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

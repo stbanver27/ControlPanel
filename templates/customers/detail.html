@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.nombre }}{% endblock %}
+{% block page_heading %}Detalle del cliente{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ customer.nombre }}</div>
+    <div class="page-subtitle">
+      <span class="badge
+        {% if customer.estado == 'activo' %}badge-success
+        {% elif customer.estado == 'vencido' %}badge-error
+        {% else %}badge-warning{% endif %}">
+        {{ customer.estado }}
+      </span>
+      {% for tag in customer.tags %}
+      <span class="badge badge-accent" style="margin-left:4px">{{ tag.nombre }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="action-group">
+    <a href="/subscriptions/create?customer_id={{ customer.id }}" class="btn btn-success">+ Suscripción</a>
+    <a href="/payments/create?customer_id={{ customer.id }}" class="btn btn-primary">+ Pago</a>
+    <a href="/customers/{{ customer.id }}/edit" class="btn btn-secondary">✏ Editar</a>
+    <button class="btn btn-danger btn-sm"
+      onclick="confirmDelete('delCust{{ customer.id }}', 'Eliminar cliente {{ customer.nombre }} y todos sus datos?')">🗑</button>
+    <form id="delCust{{ customer.id }}" method="post" action="/customers/{{ customer.id }}/delete" style="display:none"></form>
+    <a href="/customers" class="btn btn-secondary">← Lista</a>
+  </div>
+</div>
+
+<!-- Info card -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-title" style="margin-bottom:14px">Información</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+    <div>
+      <div class="form-label">Username IPTV</div>
+      <div class="font-mono" style="margin-top:2px">{{ customer.username or '—' }}</div>
+    </div>
+    <div>
+      <div class="form-label">WhatsApp</div>
+      <div style="margin-top:2px">{{ customer.whatsapp or '—' }}</div>
+    </div>
+    <div>
+      <div class="form-label">Email</div>
+      <div style="margin-top:2px">{{ customer.email or '—' }}</div>
+    </div>
+    <div>
+      <div class="form-label">País</div>
+      <div style="margin-top:2px">{{ customer.pais or '—' }}</div>
+    </div>
+    <div>
+      <div class="form-label">Registrado</div>
+      <div style="margin-top:2px">{{ customer.created_at.strftime('%d/%m/%Y') if customer.created_at else '—' }}</div>
+    </div>
+    <div>
+      <div class="form-label">Notas</div>
+      <div style="margin-top:2px;color:var(--text-muted);font-size:13px">{{ customer.notas or '—' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Subscriptions -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header">
+    <span class="card-title">📺 Historial de suscripciones</span>
+    <a href="/subscriptions/create?customer_id={{ customer.id }}" class="btn btn-secondary btn-sm">+ Nueva</a>
+  </div>
+  {% if customer.subscriptions %}
+  <div class="table-wrap" style="border:none;border-radius:0">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Plan</th>
+          <th>Inicio</th>
+          <th>Vencimiento</th>
+          <th>Pantallas</th>
+          <th>Precio</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in customer.subscriptions %}
+        {% set status = calc_status(sub.fecha_vencimiento) %}
+        <tr>
+          <td class="td-muted">{{ sub.id }}</td>
+          <td>{{ sub.plan.nombre if sub.plan else '—' }}</td>
+          <td class="td-muted">{{ sub.fecha_inicio.strftime('%d/%m/%Y') }}</td>
+          <td class="nowrap">{{ sub.fecha_vencimiento.strftime('%d/%m/%Y') }}</td>
+          <td>{{ sub.pantallas }}</td>
+          <td>${{ "%.2f"|format(sub.precio) }}</td>
+          <td>
+            <span class="badge
+              {% if status == 'activa' %}badge-success
+              {% elif status == 'por vencer' %}badge-warning
+              {% else %}badge-error{% endif %}">
+              {{ status }}
+            </span>
+          </td>
+          <td>
+            <div class="action-group">
+              <a href="/subscriptions/{{ sub.id }}/edit" class="btn btn-secondary btn-sm">✏</a>
+              <button class="btn btn-danger btn-sm"
+                onclick="confirmDelete('delSub{{ sub.id }}', 'Eliminar esta suscripción?')">🗑</button>
+              <form id="delSub{{ sub.id }}" method="post" action="/subscriptions/{{ sub.id }}/delete" style="display:none"></form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:28px">
+    <div class="empty-text">Sin suscripciones registradas</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Payments -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">💰 Historial de pagos</span>
+    <a href="/payments/create?customer_id={{ customer.id }}" class="btn btn-secondary btn-sm">+ Nuevo</a>
+  </div>
+  {% if customer.payments %}
+  <div class="table-wrap" style="border:none;border-radius:0">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Método</th>
+          <th>Monto</th>
+          <th>Moneda</th>
+          <th>Estado</th>
+          <th>Notas</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in customer.payments %}
+        <tr>
+          <td class="td-muted">{{ p.id }}</td>
+          <td class="td-muted nowrap">{{ p.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ p.metodo }}</td>
+          <td>${{ "%.2f"|format(p.monto) }}</td>
+          <td>{{ p.moneda }}</td>
+          <td>
+            <span class="badge {% if p.estado == 'confirmado' %}badge-success{% else %}badge-warning{% endif %}">
+              {{ p.estado }}
+            </span>
+          </td>
+          <td class="td-muted">{{ p.notas or '—' }}</td>
+          <td>
+            <div class="action-group">
+              {% if p.estado == 'pendiente' %}
+              <form method="post" action="/payments/{{ p.id }}/confirm" style="display:inline">
+                <button type="submit" class="btn btn-success btn-sm">✓ Confirmar</button>
+              </form>
+              {% endif %}
+              <a href="/payments/{{ p.id }}/edit" class="btn btn-secondary btn-sm">✏</a>
+              <button class="btn btn-danger btn-sm"
+                onclick="confirmDelete('delPay{{ p.id }}', 'Eliminar este pago?')">🗑</button>
+              <form id="delPay{{ p.id }}" method="post" action="/payments/{{ p.id }}/delete" style="display:none"></form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:28px">
+    <div class="empty-text">Sin pagos registrados</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

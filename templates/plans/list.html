@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Planes{% endblock %}
+{% block page_heading %}Planes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Planes de suscripción</div>
+  <a href="/plans/create" class="btn btn-primary">+ Nuevo plan</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Duración</th>
+        <th>Pantallas</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for plan in plans %}
+      <tr>
+        <td class="td-muted">{{ plan.id }}</td>
+        <td><strong>{{ plan.nombre }}</strong></td>
+        <td>{{ plan.duracion_dias }} días</td>
+        <td>{{ plan.pantallas }}</td>
+        <td><strong>${{ "%.2f"|format(plan.precio) }}</strong></td>
+        <td>
+          <span class="badge {% if plan.activo %}badge-success{% else %}badge-muted{% endif %}">
+            {% if plan.activo %}Activo{% else %}Inactivo{% endif %}
+          </span>
+        </td>
+        <td>
+          <div class="action-group">
+            <a href="/plans/{{ plan.id }}/edit" class="btn btn-secondary btn-sm">✏ Editar</a>
+            <button class="btn btn-danger btn-sm"
+              onclick="confirmDelete('delPlan{{ plan.id }}', 'Eliminar plan {{ plan.nombre }}?')">🗑</button>
+            <form id="delPlan{{ plan.id }}" method="post" action="/plans/{{ plan.id }}/delete" style="display:none"></form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7">
+          <div class="empty-state">
+            <div class="empty-icon">📦</div>
+            <div class="empty-text">No hay planes creados aún</div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

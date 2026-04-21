@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Suscripciones{% endblock %}
+{% block page_heading %}Suscripciones{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Suscripciones</div>
+  <a href="/subscriptions/create" class="btn btn-primary">+ Nueva suscripción</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Cliente</th>
+        <th>Plan</th>
+        <th>Inicio</th>
+        <th>Vencimiento</th>
+        <th>Pantallas</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sub in subscriptions %}
+      {% set status = calc_status(sub.fecha_vencimiento) %}
+      <tr>
+        <td class="td-muted">{{ sub.id }}</td>
+        <td><a href="/customers/{{ sub.customer.id }}">{{ sub.customer.nombre }}</a></td>
+        <td class="td-muted">{{ sub.plan.nombre if sub.plan else '—' }}</td>
+        <td class="td-muted nowrap">{{ sub.fecha_inicio.strftime('%d/%m/%Y') }}</td>
+        <td class="nowrap">{{ sub.fecha_vencimiento.strftime('%d/%m/%Y') }}</td>
+        <td>{{ sub.pantallas }}</td>
+        <td>${{ "%.2f"|format(sub.precio) }}</td>
+        <td>
+          <span class="badge
+            {% if status == 'activa' %}badge-success
+            {% elif status == 'por vencer' %}badge-warning
+            {% else %}badge-error{% endif %}">
+            {{ status }}
+          </span>
+        </td>
+        <td>
+          <div class="action-group">
+            <a href="/subscriptions/create?customer_id={{ sub.customer.id }}" class="btn btn-success btn-sm" title="Renovar">↻</a>
+            <a href="/subscriptions/{{ sub.id }}/edit" class="btn btn-secondary btn-sm">✏</a>
+            <button class="btn btn-danger btn-sm"
+              onclick="confirmDelete('delSub{{ sub.id }}', 'Eliminar suscripción de {{ sub.customer.nombre }}?')">🗑</button>
+            <form id="delSub{{ sub.id }}" method="post" action="/subscriptions/{{ sub.id }}/delete" style="display:none"></form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9">
+          <div class="empty-state">
+            <div class="empty-icon">📺</div>
+            <div class="empty-text">No hay suscripciones registradas</div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

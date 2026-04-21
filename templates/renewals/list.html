@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Renovaciones{% endblock %}
+{% block page_heading %}Renovaciones{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Centro de renovaciones</div>
+</div>
+
+<!-- Vencen HOY -->
+<div class="renewal-section">
+  <div class="renewal-section-header">
+    <span class="renewal-section-title text-error">🔴 Vencen HOY</span>
+    <span class="renewal-count">{{ vencen_hoy|length }}</span>
+  </div>
+  {% if vencen_hoy %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Username</th>
+          <th>Plan</th>
+          <th>Vencimiento</th>
+          <th>Pantallas</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in vencen_hoy %}
+        <tr>
+          <td><a href="/customers/{{ sub.customer.id }}">{{ sub.customer.nombre }}</a></td>
+          <td class="td-muted font-mono">{{ sub.customer.username or '—' }}</td>
+          <td class="td-muted">{{ sub.plan.nombre if sub.plan else '—' }}</td>
+          <td>
+            <span class="badge badge-error">{{ sub.fecha_vencimiento.strftime('%d/%m/%Y') }}</span>
+          </td>
+          <td>{{ sub.pantallas }}</td>
+          <td>${{ "%.2f"|format(sub.precio) }}</td>
+          <td>
+            <div class="action-group">
+              <a href="/subscriptions/create?customer_id={{ sub.customer.id }}" class="btn btn-success btn-sm">↻ Renovar</a>
+              <a href="/payments/create?customer_id={{ sub.customer.id }}&subscription_id={{ sub.id }}" class="btn btn-primary btn-sm">💰 Pago</a>
+              <a href="/customers/{{ sub.customer.id }}" class="btn btn-secondary btn-sm">👁 Ver</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:24px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px">
+    <div class="empty-text text-success">✓ Ninguna suscripción vence hoy</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Vencen en 3 días -->
+<div class="renewal-section">
+  <div class="renewal-section-header">
+    <span class="renewal-section-title text-warning">🟡 Vencen en los próximos 3 días</span>
+    <span class="renewal-count">{{ vencen_3dias|length }}</span>
+  </div>
+  {% if vencen_3dias %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Username</th>
+          <th>Plan</th>
+          <th>Vencimiento</th>
+          <th>Días restantes</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in vencen_3dias %}
+        {% set dias = (sub.fecha_vencimiento - today).days %}
+        <tr>
+          <td><a href="/customers/{{ sub.customer.id }}">{{ sub.customer.nombre }}</a></td>
+          <td class="td-muted font-mono">{{ sub.customer.username or '—' }}</td>
+          <td class="td-muted">{{ sub.plan.nombre if sub.plan else '—' }}</td>
+          <td>
+            <span class="badge badge-warning">{{ sub.fecha_vencimiento.strftime('%d/%m/%Y') }}</span>
+          </td>
+          <td>
+            <span class="text-warning">{{ dias }} día{% if dias != 1 %}s{% endif %}</span>
+          </td>
+          <td>${{ "%.2f"|format(sub.precio) }}</td>
+          <td>
+            <div class="action-group">
+              <a href="/subscriptions/create?customer_id={{ sub.customer.id }}" class="btn btn-success btn-sm">↻ Renovar</a>
+              <a href="/payments/create?customer_id={{ sub.customer.id }}&subscription_id={{ sub.id }}" class="btn btn-primary btn-sm">💰 Pago</a>
+              <a href="/customers/{{ sub.customer.id }}" class="btn btn-secondary btn-sm">👁 Ver</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:24px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px">
+    <div class="empty-text">Ninguna suscripción vence en los próximos 3 días</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Ya vencidas -->
+<div class="renewal-section">
+  <div class="renewal-section-header">
+    <span class="renewal-section-title text-muted">⚫ Ya vencidas</span>
+    <span class="renewal-count">{{ ya_vencidas|length }}</span>
+  </div>
+  {% if ya_vencidas %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Username</th>
+          <th>Plan</th>
+          <th>Venció el</th>
+          <th>Días vencida</th>
+          <th>Precio</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in ya_vencidas %}
+        {% set dias = (today - sub.fecha_vencimiento).days %}
+        <tr>
+          <td><a href="/customers/{{ sub.customer.id }}">{{ sub.customer.nombre }}</a></td>
+          <td class="td-muted font-mono">{{ sub.customer.username or '—' }}</td>
+          <td class="td-muted">{{ sub.plan.nombre if sub.plan else '—' }}</td>
+          <td>
+            <span class="badge badge-muted">{{ sub.fecha_vencimiento.strftime('%d/%m/%Y') }}</span>
+          </td>
+          <td class="td-muted">hace {{ dias }} día{% if dias != 1 %}s{% endif %}</td>
+          <td>${{ "%.2f"|format(sub.precio) }}</td>
+          <td>
+            <div class="action-group">
+              <a href="/subscriptions/create?customer_id={{ sub.customer.id }}" class="btn btn-success btn-sm">↻ Renovar</a>
+              <a href="/payments/create?customer_id={{ sub.customer.id }}&subscription_id={{ sub.id }}" class="btn btn-primary btn-sm">💰 Pago</a>
+              <a href="/customers/{{ sub.customer.id }}" class="btn btn-secondary btn-sm">👁 Ver</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding:24px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px">
+    <div class="empty-text text-success">✓ No hay suscripciones vencidas</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Pass today's date to Jinja via JS for the "days remaining" calc
+  const today = new Date("{{ today }}");
+</script>
+{% endblock %}

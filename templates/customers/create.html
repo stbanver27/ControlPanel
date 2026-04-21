@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Nuevo cliente{% endblock %}
+{% block page_heading %}Nuevo cliente{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Registrar cliente</div>
+  <a href="/customers" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="card form-page">
+  {% if error %}
+  <div class="error-alert">✕ {{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/customers/create">
+    <div class="form-grid form-grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label" for="nombre">Nombre <span class="required">*</span></label>
+        <input class="form-control" type="text" id="nombre" name="nombre"
+               value="{{ form.nombre if form else '' }}" required placeholder="Nombre completo">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="username">Username IPTV</label>
+        <input class="form-control" type="text" id="username" name="username"
+               value="{{ form.username if form else '' }}" placeholder="usuario123">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="whatsapp">WhatsApp</label>
+        <input class="form-control" type="text" id="whatsapp" name="whatsapp"
+               value="{{ form.whatsapp if form else '' }}" placeholder="+1 555 000 0000">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-control" type="email" id="email" name="email"
+               value="{{ form.email if form else '' }}" placeholder="cliente@correo.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pais">País</label>
+        <input class="form-control" type="text" id="pais" name="pais"
+               value="{{ form.pais if form else '' }}" placeholder="Venezuela, USA…">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="estado">Estado</label>
+        <select class="form-control" id="estado" name="estado">
+          <option value="activo"     {% if not form or form.estado == 'activo'     %}selected{% endif %}>Activo</option>
+          <option value="vencido"    {% if form and form.estado == 'vencido'    %}selected{% endif %}>Vencido</option>
+          <option value="suspendido" {% if form and form.estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Etiquetas</label>
+      <div class="checkbox-group">
+        {% for tag in tags %}
+        <label class="checkbox-item">
+          <input type="checkbox" name="tag_ids" value="{{ tag.id }}"
+            {% if selected_tags and tag.id in selected_tags %}checked{% endif %}>
+          {{ tag.nombre }}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:20px">
+      <label class="form-label" for="notas">Notas internas</label>
+      <textarea class="form-control" id="notas" name="notas" placeholder="Observaciones…">{{ form.notas if form else '' }}</textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar cliente</button>
+      <a href="/customers" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

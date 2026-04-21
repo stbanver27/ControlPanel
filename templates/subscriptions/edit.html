@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Editar suscripción{% endblock %}
+{% block page_heading %}Editar suscripción{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-title">Editar suscripción #{{ sub.id }}</div>
+  <a href="/subscriptions" class="btn btn-secondary">← Volver</a>
+</div>
+
+<div class="card form-page">
+  {% if error %}
+  <div class="error-alert">✕ {{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/subscriptions/{{ sub.id }}/edit">
+    <div class="form-grid form-grid-2" style="margin-bottom:16px">
+      <div class="form-group">
+        <label class="form-label" for="customer_id">Cliente <span class="required">*</span></label>
+        <select class="form-control" id="customer_id" name="customer_id" required>
+          {% for c in customers %}
+          <option value="{{ c.id }}" {% if c.id == sub.customer_id %}selected{% endif %}>
+            {{ c.nombre }}{% if c.username %} ({{ c.username }}){% endif %}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="plan_id">
+          Plan
+          <span id="duracion_hint" class="text-muted" style="font-size:11px;margin-left:6px"></span>
+        </label>
+        <select class="form-control" id="plan_id" name="plan_id">
+          <option value="">— Sin plan (manual) —</option>
+          {% for p in plans %}
+          <option value="{{ p.id }}" {% if sub.plan_id and p.id == sub.plan_id %}selected{% endif %}>
+            {{ p.nombre }} — ${{ "%.2f"|format(p.precio) }} / {{ p.duracion_dias }}d
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fecha_inicio">Fecha de inicio <span class="required">*</span></label>
+        <input class="form-control" type="date" id="fecha_inicio" name="fecha_inicio"
+               value="{{ sub.fecha_inicio.isoformat() }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fecha_vencimiento">Fecha de vencimiento <span class="required">*</span></label>
+        <input class="form-control" type="date" id="fecha_vencimiento" name="fecha_vencimiento"
+               value="{{ sub.fecha_vencimiento.isoformat() }}" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="pantallas">Pantallas <span class="required">*</span></label>
+        <input class="form-control" type="number" id="pantallas" name="pantallas"
+               value="{{ sub.pantallas }}" required min="1">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="precio">Precio (USD) <span class="required">*</span></label>
+        <input class="form-control" type="number" id="precio" name="precio"
+               value="{{ sub.precio }}" required min="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <a href="/subscriptions" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

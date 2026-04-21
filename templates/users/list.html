@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block page_heading %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Usuarios del sistema</div>
+    <div class="page-subtitle">Solo visible para superadmin</div>
+  </div>
+  <a href="/users/create" class="btn btn-primary">+ Nuevo usuario</a>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th>Creado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td class="td-muted">{{ user.id }}</td>
+        <td>
+          {{ user.email }}
+          {% if user.id == current_user.id %}
+          <span class="badge badge-accent" style="font-size:10px;margin-left:6px">Tú</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge {% if user.rol == 'superadmin' %}badge-accent{% else %}badge-muted{% endif %}">
+            {{ user.rol }}
+          </span>
+        </td>
+        <td>
+          <span class="badge {% if user.is_active %}badge-success{% else %}badge-error{% endif %}">
+            {% if user.is_active %}Activo{% else %}Inactivo{% endif %}
+          </span>
+        </td>
+        <td class="td-muted">{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else '—' }}</td>
+        <td>
+          <div class="action-group">
+            <a href="/users/{{ user.id }}/edit" class="btn btn-secondary btn-sm">✏ Editar</a>
+            {% if user.id != current_user.id %}
+            <button
+              class="btn btn-danger btn-sm"
+              onclick="confirmDelete('deleteForm{{ user.id }}', 'Eliminar usuario {{ user.email }}?')"
+            >🗑 Eliminar</button>
+            <form id="deleteForm{{ user.id }}" method="post" action="/users/{{ user.id }}/delete" style="display:none"></form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <div class="empty-icon">👤</div>
+            <div class="empty-text">No hay usuarios registrados</div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
